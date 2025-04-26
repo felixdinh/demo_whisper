@@ -45,5 +45,20 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to your microphone to record and transcribe your voice using Whisper AI technology.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to save recorded audio files.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need access to your photo library to save recorded audio files.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>We need access to your documents folder to save and manage audio files.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>We need access to your downloads folder to save and manage audio files.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
