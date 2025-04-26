@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'services/speech_service.dart';
 
@@ -39,6 +37,8 @@ class _WhisperDemoState extends State<WhisperDemo> {
   bool _isPlaying = false;
   String _transcribedText = '';
   String? _lastRecordedPath;
+  Duration _duration = Duration.zero;
+  Duration _position = Duration.zero;
 
   @override
   void initState() {
@@ -51,6 +51,18 @@ class _WhisperDemoState extends State<WhisperDemo> {
     _audioPlayer.onPlayerStateChanged.listen((state) {
       setState(() {
         _isPlaying = state == PlayerState.playing;
+      });
+    });
+
+    _audioPlayer.onDurationChanged.listen((duration) {
+      setState(() {
+        _duration = duration;
+      });
+    });
+
+    _audioPlayer.onPositionChanged.listen((position) {
+      setState(() {
+        _position = position;
       });
     });
   }
@@ -98,10 +110,17 @@ class _WhisperDemoState extends State<WhisperDemo> {
     if (_lastRecordedPath == null) return;
 
     if (_isPlaying) {
-      await _audioPlayer.stop();
+      await _audioPlayer.pause();
     } else {
       await _audioPlayer.play(DeviceFileSource(_lastRecordedPath!));
     }
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
   }
 
   @override
@@ -126,21 +145,42 @@ class _WhisperDemoState extends State<WhisperDemo> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (_lastRecordedPath != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              _isPlaying ? Icons.pause : Icons.play_arrow,
-                              size: 48,
-                            ),
-                            onPressed: _togglePlayback,
+                    Column(
+                      children: [
+                        Slider(
+                          value: _position.inSeconds.toDouble(),
+                          min: 0.0,
+                          max: _duration.inSeconds.toDouble(),
+                          onChanged: (value) {
+                            _audioPlayer.seek(Duration(seconds: value.toInt()));
+                          },
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(_formatDuration(_position)),
+                              Text(_formatDuration(_duration)),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                _isPlaying ? Icons.pause : Icons.play_arrow,
+                                size: 48,
+                              ),
+                              onPressed: _togglePlayback,
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
+                  const SizedBox(height: 20),
                   Text(
                     _transcribedText,
                     style: Theme.of(context).textTheme.headlineMedium,
