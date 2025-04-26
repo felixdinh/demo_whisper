@@ -17,7 +17,7 @@ class SpeechService {
     try {
       // First try to load the model from assets
       debugPrint("Trying to load model from assets...");
-      final bytesBase = await rootBundle.load('assets/ggml-base.bin');
+      final bytesBase = await rootBundle.load('assets/models/ggml-base.bin');
       final modelPathBase = await whisperController.getPath(model);
       final fileBase = File(modelPathBase);
       await fileBase.writeAsBytes(bytesBase.buffer.asUint8List(bytesBase.offsetInBytes, bytesBase.lengthInBytes));
